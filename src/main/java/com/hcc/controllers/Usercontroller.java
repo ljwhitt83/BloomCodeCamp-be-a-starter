@@ -52,8 +52,6 @@ public class Usercontroller {
         }
 
     }
-    //TODO: User logout mapping
-    //TODO: User register mapping
 
     //TODO: User Validate mapping with token
     @GetMapping("/validate")
