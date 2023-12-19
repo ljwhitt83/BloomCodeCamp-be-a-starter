@@ -1,13 +1,36 @@
 package com.hcc.entities;
 
+
+import javax.persistence.*;
+
+@Entity
+@Table(name="assignments")
 public class Assignment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name="status")
     private String status;
+
+    @Column(name="number")
     private int Number;
+
+    @Column(name="github_url")
     private String githubUrl;
+
+    @Column(name="branch")
     private String branch;
+
+    @Column(name="review_video_url")
     private String reviewVidueoUrl;
+
+    @ManyToOne(optional = false)
     private User user;
+
+    @ManyToOne()
+    private User codeReview;
 
     public Long getId() {
         return id;
@@ -64,16 +87,26 @@ public class Assignment {
     public void setUser(User user) {
         this.user = user;
     }
+    public User getCodeReview() {
+        return codeReview;
+    }
+
+    public void setCodeReview(User codeReview) {
+        this.codeReview = codeReview;
+    }
 
     public Assignment() {
     }
 
-    public Assignment(String status, int number, String githubUrl, String branch, String reviewVidueoUrl, User user) {
+
+
+    public Assignment(String status, int number, String githubUrl, String branch, String reviewVidueoUrl, User user, User codeReview) {
         this.status = status;
         Number = number;
         this.githubUrl = githubUrl;
         this.branch = branch;
         this.reviewVidueoUrl = reviewVidueoUrl;
         this.user = user;
+        this.codeReview = codeReview;
     }
 }
