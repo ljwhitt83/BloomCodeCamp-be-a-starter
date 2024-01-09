@@ -1,8 +1,10 @@
 package com.hcc.entities;
 
+import com.hcc.enums.AuthorityEnum;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name="authorities")
@@ -13,13 +15,18 @@ public class Authority implements GrantedAuthority {
     private Long id;
 
     @Column(name="authority")
-    private String authority;
+    @Enumerated(EnumType.STRING)
+    private AuthorityEnum authority;
 
-    @ManyToOne(optional = false)
-    private User user;
+    @ManyToMany(mappedBy = "authorities")
+    private Set<User> user;
 
     public Authority() {
+    }
 
+    public Authority(AuthorityEnum authority, Set<User> user) {
+        this.authority = authority;
+        this.user = user;
     }
 
     public Long getId() {
@@ -30,28 +37,20 @@ public class Authority implements GrantedAuthority {
         this.id = id;
     }
 
-    public String getAuthority() {
-        return authority;
-    }
-
-    public void setAuthority(String authority) {
+    public void setAuthority(AuthorityEnum authority) {
         this.authority = authority;
     }
 
-    public User getUser() {
+    public Set<User> getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(Set<User> user) {
         this.user = user;
     }
 
-    public Authority(String authority) {
-        this.authority = authority;
-    }
-
-    public Authority(String authority, User user) {
-        this.authority = authority;
-        this.user = user;
+    @Override
+    public String getAuthority() {
+        return authority.name();
     }
 }
