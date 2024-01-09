@@ -2,6 +2,9 @@ package com.hcc.controllers;
 
 import com.hcc.dtos.AuthCredentialRequest;
 import com.hcc.entities.User;
+import com.hcc.repositories.UserRepository;
+import com.hcc.services.AuthorityService;
+import com.hcc.utils.CustomPasswordEncoder;
 import com.hcc.utils.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +17,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/api/auth")
@@ -23,7 +28,16 @@ public class Usercontroller {
     private AuthenticationManager authenticationManager;
 
     @Autowired
+    private AuthorityService authorityService;
+
+    @Autowired
     private JWTUtils jwtUtils;
+
+    @Autowired
+    private CustomPasswordEncoder customPasswordEncoder;
+
+    @Autowired
+    private UserRepository userRepo;
 
     //TODO: User login mapping
     @PostMapping("/login")
@@ -68,4 +82,46 @@ public class Usercontroller {
 
     }
 
+    //create a new user
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) throws Exception {
+        Authentication authentication;
+
+        try {
+            // Encode the password for security
+            String encodedPassword = customPasswordEncoder.getPasswordEncoder().encode(user.getPassword());
+            user.setPassword(encodedPassword);
+
+            // Persist the user in the database
+            userRepo.save(user);
+
+            // Authenticate with authorities
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getUsername(),
+                            encodedPassword, // Use the encoded password for authentication
+                            user.getAuthorities()));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            User newUser = (User) authentication.getPrincipal();
+            // Set password to null for security
+            newUser.setPassword(null);
+
+            // Generate token
+            String passwordToken = jwtUtils.generateToken(newUser);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.AUTHORIZATION, passwordToken)
+                    .body(newUser.getUsername());
+        } catch (BadCredentialsException exception) {
+            throw new Exception("Invalid credentials");
+        }
+    }
+
+    //api call for authorities
+    @GetMapping("/authorities")
+    public ResponseEntity<List<String>> getAuthorities() {
+        List<String> authorityName = authorityService.getAuthorityNames();
+        return ResponseEntity.ok(authorityName);
+    }
 }

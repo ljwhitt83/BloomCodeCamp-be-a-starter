@@ -1,12 +1,10 @@
 package com.hcc.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,8 +24,8 @@ public class User implements UserDetails {
     @Column(name="password")
     private String password;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
-    @JsonIgnore
+    @ManyToMany(cascade = CascadeType.PERSIST) // cascade changes to User to Authority
+    @Column(name="authority")
     private List<Authority> authorities;
 
     public User(LocalDate cohortStartDate, String username, String password, List<Authority> authorities) {
@@ -89,10 +87,9 @@ public class User implements UserDetails {
     }
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            List<GrantedAuthority> roles = new ArrayList<>();
-            roles.add(new Authority("role_student"));
-            return roles;
+            return authorities;
         }
+
 
         @Override
         public String getUsername() {

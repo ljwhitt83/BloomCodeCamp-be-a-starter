@@ -13,6 +13,8 @@ import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Set;
 
+
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/assignments")
 public class AssignmentController {
